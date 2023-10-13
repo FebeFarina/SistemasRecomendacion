@@ -24,14 +24,16 @@ reviews = matrix_data
 main_rows = []
 
 for rows in reviews:
-  if None in rows:
-    main_rows.append(rows)
+  for e in range(len(rows)):
+    if rows[e] is None:
+      main_rows.append((rows,e))
+      break
 
-for rows in main_rows:
+for rows_og in main_rows:
   flags = []
   similarities = []
   mean = []
-  rows = rows.copy()
+  rows = rows_og[0].copy()
   # Si encuentra un valor vacío, lo elimina de la lista y agrega un True a la lista de flags
   for i,e in enumerate(rows):
     if e is None:
@@ -54,6 +56,11 @@ for rows in main_rows:
     mean.append(np.mean(other_rows))
   highest = heapq.nlargest(2, similarities)
   result = 0
+  div = 0
   for sim in highest:
-    result += sim[0] * (mean[i[sim[1]]])
+    result += sim[0] * (reviews[sim[1]][rows_og[1]]-mean[sim[1]])
+    div += sim[0]
+    print(sim[0], "* (", reviews[sim[1]][rows_og[1]], "-", mean[sim[1]],")")
+  result =(result/div) * (max_rate-min_rate)
+  print(result)
   

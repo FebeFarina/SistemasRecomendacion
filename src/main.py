@@ -1,5 +1,11 @@
 import numpy as np
+import heapq
 
+def del_col(matrix, i):
+  for row in matrix:
+    del row[i]
+  return matrix
+    
 with open("data/ejemplo1.txt", "r") as f:
   contents = f.readlines()
 
@@ -14,24 +20,40 @@ for line in contents[2:]:
 
 reviews = matrix_data
 
-print(min_rate)
-print(max_rate)
-print(reviews)
+# Llamamos main_rows a las filas que tienen valores vacíos
+main_rows = []
 
+for rows in reviews:
+  if None in rows:
+    main_rows.append(rows)
 
-# bucle que va a recorrer la matriz de reviews por filas
-for i in range(len(reviews)):
-  for j in range(len(reviews)):
-    if i != j and j > i:
-    #creamos un array para guadar las banderas
-      flags = []
-      # bucle que va a recorrer la matriz de reviews por columnas
-      for k,l in zip(range(len(reviews[i])), range(len(reviews[j]))):
-        # si el valor de la celda es None, subimos la bandera
-        if (reviews[i][k] is None) or (reviews[j][l] is None):
-          flags.append(True)
-        else:
-          flags.append(False)
-      #la operacion va a este nivel
-
-  print (flags)
+for rows in main_rows:
+  flags = []
+  similarities = []
+  mean = []
+  rows = rows.copy()
+  # Si encuentra un valor vacío, lo elimina de la lista y agrega un True a la lista de flags
+  for i,e in enumerate(rows):
+    if e is None:
+      flags.append(True)
+      rows.remove(e)
+    else:
+      flags.append(False)
+  for j,other_rows in enumerate(reviews):
+    aux_row = rows.copy()
+    other_rows = other_rows.copy()
+    for i,e in enumerate(flags):
+      if e == True:
+        del other_rows[i]
+    if other_rows != aux_row:
+      for i,e in enumerate(other_rows):
+        if e is None:
+          other_rows.remove(e)
+          del aux_row[i]
+      similarities.append((np.corrcoef(aux_row, other_rows)[0][1],j))
+    mean.append(np.mean(other_rows))
+  highest = heapq.nlargest(2, similarities)
+  result = 0
+  for sim in highest:
+    result += sim[0] * (mean[i[sim[1]]])
+  

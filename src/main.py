@@ -1,10 +1,8 @@
 import numpy as np
 import heapq
 
-def del_col(matrix, i):
-  for row in matrix:
-    del row[i]
-  return matrix
+def del_element(list, index):
+  return list[:index] + list[index+1:]
     
 with open("data/ejemplo1.txt", "r") as f:
   contents = f.readlines()
@@ -27,11 +25,12 @@ matrix_result = reviews.copy()
 # Llamamos main_rows a las filas que tienen valores vacíos
 main_rows = []
 
-for i,rows in enumerate(reviews):
-  for e in range(len(rows)):
-    if rows[e] is None:
-      main_rows.append((rows,e,i))
+for j,rows in enumerate(reviews):
+  for i in range(len(rows)):
+    if rows[i] is None:
+      main_rows.append((rows,i,j))
       break
+
 # Rows_og contiene la fila con valores vacíos y los índices de fila y columna
 for rows_og in main_rows:
   # Flags es un array de booleanos que almacena si hay un valor vacío en la fila
@@ -41,40 +40,26 @@ for rows_og in main_rows:
   # Mean es un array que almacena el promedio de cada fila
   mean = []
   # Rows es una copia de la fila con valores vacíos para poder eliminarlos sin perder la fila original
-  rows = rows_og[0].copy()
+  #main_rows = rows_og[0].copy()
   # Si encuentra un valor vacío, lo elimina de la lista y agrega un True a la lista de flags
 
-  for i,e in enumerate(rows.copy()):
-    #busca los valores vacíos
-    if e is None:
-      #subimos la bandera para no tener en cunenta la columna con el valor vacio
-      flags.append(True)
-      #eliminamos el valor vacio de la lista
-      rows.remove(e)
-    else:
-      #mantenemos la bandera baja
-      flags.append(False)
   for j,other_rows in enumerate(reviews):
-    #aux_row es una copia de la fila para no perder la fila original
-    aux_row = rows.copy()
-    #other_rows son las filas con las que se comparará la fila con valores vacíos
-    other_rows = other_rows.copy()
-    
-    #eliminamos la columna con el valor vacio si la bandera esta en True
-    for i,e in enumerate(flags):
-      if e == True:
-        del other_rows[i]
-
-    #borra los valores de las otras columnas con valores vacios a la hora de comparar 2 columnas con valores vacios
-    if other_rows != aux_row:
+    main_rows = rows_og[0].copy()
+    if other_rows != rows_og[0]:
+      for i,e in enumerate(main_rows):
+        if e is None:
+          main_rows.remove(e)
+          other_rows = del_element(other_rows, i)
       for i,e in enumerate(other_rows):
         if e is None:
           other_rows.remove(e)
-          del aux_row[i]
-      similarities.append((np.corrcoef(aux_row, other_rows)[0][1],j))
-    mean.append(np.mean(other_rows))
+          main_rows = del_element(main_rows, i)
+      similarities.append((np.corrcoef(main_rows, other_rows)[0][1],j))
+      mean.append(np.mean(other_rows))
+    else:
+      other_rows = [x for x in other_rows if x is not None]
+      mean.append(np.mean(other_rows))
   highest = heapq.nlargest(2, similarities)
-  
   result = 0
   div = 0
   for sim in highest:
@@ -90,5 +75,4 @@ for row in matrix_result:
     e = e * (max_rate-min_rate) + min_rate
     print(round(e, 3), end=" ")
   print()
-
-  
+      

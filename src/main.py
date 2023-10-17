@@ -45,7 +45,7 @@ for rows_og in main_rows:
   for j,other_rows in enumerate(reviews):
     main_rows = rows_og[0].copy()
     if other_rows != rows_og[0]:
-      for i,e in enumerate(main_rows):
+      for i,e in enumerate(rows_og[0]):
         if e is None:
           main_rows.remove(e)
           other_rows = del_element(other_rows, i)

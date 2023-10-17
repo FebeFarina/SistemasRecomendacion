@@ -29,7 +29,6 @@ for j,rows in enumerate(reviews):
   for i in range(len(rows)):
     if rows[i] is None:
       main_rows.append((rows,i,j))
-      break
 
 # Rows_og contiene la fila con valores vacíos y los índices de fila y columna
 for rows_og in main_rows:
@@ -69,6 +68,8 @@ for rows_og in main_rows:
   result =mean[rows_og[2]] + (result/div)
   #result = result * (max_rate-min_rate) + min_rate
   matrix_result[rows_og[2]][rows_og[1]] = result
+
+
 
 for row in matrix_result:
   for e in row:

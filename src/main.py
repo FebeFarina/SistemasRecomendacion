@@ -1,6 +1,7 @@
 import numpy as np
 import heapq
 
+
 def del_element(list, index):
   return list[:index] + list[index+1:]
     
@@ -45,14 +46,26 @@ for rows_og in main_rows:
   for j,other_rows in enumerate(reviews):
     main_rows = rows_og[0].copy()
     if other_rows != rows_og[0]:
+      #print ("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+      #print("entra: ",j)
+      #print ("main: ",main_rows)
+      #print ("other: ",other_rows)
+      help_val = 0
       for i,e in enumerate(rows_og[0]):
         if e is None:
           main_rows.remove(e)
-          other_rows = del_element(other_rows, i)
+          other_rows = del_element(other_rows, i+help_val)
+          help_val -= 1
+          #print ("-----------------------------------------------------------------------------------------------------------")
+          #print ("main: ",main_rows)
+          #print ("other: ",other_rows)
       for i,e in enumerate(other_rows):
         if e is None:
           other_rows.remove(e)
-          main_rows = del_element(main_rows, i)
+          main_rows = del_element(main_rows, i+help_val)
+          help_val -= 1
+      print ("main ",main_rows)
+      print ("other ",other_rows)
       similarities.append((np.corrcoef(main_rows, other_rows)[0][1],j))
       mean.append(np.mean(other_rows))
     else:
@@ -65,6 +78,7 @@ for rows_og in main_rows:
     result += sim[0] * (reviews[sim[1]][rows_og[1]]-mean[sim[1]])
     div += sim[0]
   # Se deshace la normalización del resultado
+  print ("hola")
   result =mean[rows_og[2]] + (result/div)
   #result = result * (max_rate-min_rate) + min_rate
   matrix_result[rows_og[2]][rows_og[1]] = result

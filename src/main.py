@@ -39,12 +39,11 @@ for rows_og in main_rows:
   similarities = []
   # Mean es un array que almacena el promedio de cada fila
   mean = []
-  # Rows es una copia de la fila con valores vacíos para poder eliminarlos sin perder la fila original
-  #main_rows = rows_og[0].copy()
   # Si encuentra un valor vacío, lo elimina de la lista y agrega un True a la lista de flags
 
   for j,other_rows in enumerate(reviews):
-    main_rows = rows_og[0].copy()
+    other_copy = other_rows.copy()
+    main_copy = rows_og[0].copy()
     if other_rows != rows_og[0]:
       #print ("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
       #print("entra: ",j)
@@ -53,36 +52,44 @@ for rows_og in main_rows:
       help_val = 0
       for i,e in enumerate(rows_og[0]):
         if e is None:
-          main_rows.remove(e)
-          other_rows = del_element(other_rows, i+help_val)
+          main_copy.remove(e)
+          other_copy = del_element(other_copy, i+help_val)
           help_val -= 1
           #print ("-----------------------------------------------------------------------------------------------------------")
           #print ("main: ",main_rows)
           #print ("other: ",other_rows)
-      for i,e in enumerate(other_rows):
+      help_val = 0
+      other_copy2 = other_copy.copy()
+      for i,e in enumerate(other_copy2):
         if e is None:
-          other_rows.remove(e)
-          main_rows = del_element(main_rows, i+help_val)
+          #print("premain: ",main_copy)
+          #print("preother: ",other_copy)
+          other_copy.remove(e)
+          main_copy = del_element(main_copy, i+help_val)
           help_val -= 1
-      print ("main ",main_rows)
-      print ("other ",other_rows)
-      similarities.append((np.corrcoef(main_rows, other_rows)[0][1],j))
-      mean.append(np.mean(other_rows))
+          #print(i + help_val)
+          #print("posmain: ",main_copy)
+          #print("posother: ",other_copy)
+      #print("finmain: ",main_copy)
+      #print("finother: ",other_copy)
+      similarities.append((np.corrcoef(main_copy, other_copy)[0][1],j))
+      mean.append(np.mean(other_copy))
     else:
       other_rows = [x for x in other_rows if x is not None]
       mean.append(np.mean(other_rows))
   highest = heapq.nlargest(2, similarities)
   result = 0
   div = 0
+  print(similarities)
   for sim in highest:
     result += sim[0] * (reviews[sim[1]][rows_og[1]]-mean[sim[1]])
     div += sim[0]
+    print(div)
+  print(result, "/", div)
   # Se deshace la normalización del resultado
-  print ("hola")
   result =mean[rows_og[2]] + (result/div)
-  #result = result * (max_rate-min_rate) + min_rate
+  print(result)
   matrix_result[rows_og[2]][rows_og[1]] = result
-
 
 
 for row in matrix_result:
@@ -90,4 +97,3 @@ for row in matrix_result:
     e = e * (max_rate-min_rate) + min_rate
     print(round(e, 3), end=" ")
   print()
-      

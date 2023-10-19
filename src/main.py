@@ -9,6 +9,7 @@ def del_element(list, index):
 
 filename = "utility-matrix-5-10-1"
 
+
 with open("data/" + filename + ".txt", "r") as f:
   contents = f.readlines()
 
@@ -95,5 +96,5 @@ sys.stdout = open("results/" + filename + "-predicted.txt", "w")
 for row in matrix_result:
   for e in row:
     e = e * (max_rate-min_rate) + min_rate
-    sys.stdout.write(str(e) + " ")
+    sys.stdout.write(str(round(e,3)) + " ")
   sys.stdout.write("\n")

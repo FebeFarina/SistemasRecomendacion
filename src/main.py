@@ -1,11 +1,12 @@
 import numpy as np
 import heapq
+import sys
 
 
 def del_element(list, index):
   return list[:index] + list[index+1:]
     
-with open("data/ejemplo1.txt", "r") as f:
+with open("data/utility-matrix-100-1000-1.txt", "r") as f:
   contents = f.readlines()
 
 min_rate = float(contents[0].strip())
@@ -39,61 +40,50 @@ for rows_og in main_rows:
   similarities = []
   # Mean es un array que almacena el promedio de cada fila
   mean = []
-  # Si encuentra un valor vacío, lo elimina de la lista y agrega un True a la lista de flags
-
+  # Calculamos la similaridad de cada fila con la fila que tiene valores vacíos
   for j,other_rows in enumerate(reviews):
     other_copy = other_rows.copy()
     main_copy = rows_og[0].copy()
-    if other_rows != rows_og[0]:
-      #print ("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-      #print("entra: ",j)
-      #print ("main: ",main_rows)
-      #print ("other: ",other_rows)
+    # Caso de filas distintas
+    if j != rows_og[2]:
       help_val = 0
+      # Eliminamos los valores vacíos de la fila que estamos comparando
       for i,e in enumerate(rows_og[0]):
         if e is None:
           main_copy.remove(e)
           other_copy = del_element(other_copy, i+help_val)
           help_val -= 1
-          #print ("-----------------------------------------------------------------------------------------------------------")
-          #print ("main: ",main_rows)
-          #print ("other: ",other_rows)
       help_val = 0
       other_copy2 = other_copy.copy()
+      # Eliminamos los valores vacíos de la otra fila
       for i,e in enumerate(other_copy2):
         if e is None:
-          #print("premain: ",main_copy)
-          #print("preother: ",other_copy)
           other_copy.remove(e)
           main_copy = del_element(main_copy, i+help_val)
           help_val -= 1
-          #print(i + help_val)
-          #print("posmain: ",main_copy)
-          #print("posother: ",other_copy)
-      #print("finmain: ",main_copy)
-      #print("finother: ",other_copy)
-      similarities.append((np.corrcoef(main_copy, other_copy)[0][1],j))
+      # No añadiremos las similitudes de las filas que no tengas valores en la misma columna que el valor a predecir
+      if reviews[j][rows_og[1]] is not None:
+        similarities.append((np.corrcoef(main_copy, other_copy)[0][1],j))
       mean.append(np.mean(other_copy))
+    # Calcular la media de la fila con el valor a predecir
     else:
       other_rows = [x for x in other_rows if x is not None]
       mean.append(np.mean(other_rows))
+  # Obtenemos las dos similitudes más altas
   highest = heapq.nlargest(2, similarities)
   result = 0
   div = 0
-  print(similarities)
+  # Hacemos la predicción considerando la diferencia con la media
   for sim in highest:
     result += sim[0] * (reviews[sim[1]][rows_og[1]]-mean[sim[1]])
     div += sim[0]
-    print(div)
-  print(result, "/", div)
-  # Se deshace la normalización del resultado
   result =mean[rows_og[2]] + (result/div)
-  print(result)
   matrix_result[rows_og[2]][rows_og[1]] = result
 
-
+# Desnormalizamos los valores y almacenamos en fichero
+sys.stdout = open("results/utility-matrix-25-100-1-predicted.txt", "w")
 for row in matrix_result:
   for e in row:
     e = e * (max_rate-min_rate) + min_rate
-    print(round(e, 3), end=" ")
-  print()
+    sys.stdout.write(str(e) + " ")
+  sys.stdout.write("\n")

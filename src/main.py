@@ -6,7 +6,10 @@ import sys
 def del_element(list, index):
   return list[:index] + list[index+1:]
     
-with open("data/utility-matrix-100-1000-1.txt", "r") as f:
+
+filename = "utility-matrix-5-10-1"
+
+with open("data/" + filename + ".txt", "r") as f:
   contents = f.readlines()
 
 min_rate = float(contents[0].strip())
@@ -17,7 +20,14 @@ matrix_data = []
 #Los datos se normalizan a valores entre 0 y 1
 for line in contents[2:]:
   row = line.strip().split()
-  row = [None if x == '-' else (float(x) - min_rate)/(max_rate-min_rate) for x in row]
+  for x in row:
+    if x == '-':
+      row[row.index(x)] = None
+    elif float(x) > max_rate or float(x) < min_rate:
+      print("Error: Algún no están dentro del rango: " + x)
+      exit()
+    else:
+      row[row.index(x)] = (float(x) - min_rate)/(max_rate-min_rate)
   matrix_data.append(row)
 
 # Reviews es la matriz de datos
@@ -81,7 +91,7 @@ for rows_og in main_rows:
   matrix_result[rows_og[2]][rows_og[1]] = result
 
 # Desnormalizamos los valores y almacenamos en fichero
-sys.stdout = open("results/utility-matrix-25-100-1-predicted.txt", "w")
+sys.stdout = open("results/" + filename + "-predicted.txt", "w")
 for row in matrix_result:
   for e in row:
     e = e * (max_rate-min_rate) + min_rate

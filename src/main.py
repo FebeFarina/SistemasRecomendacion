@@ -103,7 +103,7 @@ for rows_og in main_rows:
   # Hacemos la predicción considerando la diferencia con la media
   for sim in highest:
     result += sim[0] * (reviews[sim[1]][rows_og[1]]-mean[sim[1]])
-    div += sim[0]
+    div += abs(sim[0])
   result =mean[rows_og[2]] + (result/div)
   matrix_result[rows_og[2]][rows_og[1]] = result
 

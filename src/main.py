@@ -2,14 +2,27 @@ import numpy as np
 import heapq
 import sys
 import copy
+import argparse
 
 
 def del_element(list, index):
   return list[:index] + list[index+1:]
-    
 
-filename = "ejemplo1"
-filename = "utility-matrix-5-10-1"
+def calculate_distance(row1, row2, metric):
+  if metric == 'pearson':
+    return np.corrcoef(row1, row2)[0][1]
+  elif metric == 'cosine':
+    return 1 - np.dot(row1, row2)/(np.linalg.norm(row1)*np.linalg.norm(row2))
+  elif metric == 'euclidean':
+    return np.linalg.norm(row1-row2)
+    
+parser = argparse.ArgumentParser(description='Process filename.')
+parser.add_argument('-f', '--file', type=str, help='filename', required=True)
+parser.add_argument('-m', '--metric', type=str, help='metric', choices=['pearson', 'cosine', 'euclidean'], required=True)
+
+args = parser.parse_args()
+
+filename = args.file
 
 
 with open("data/" + filename + ".txt", "r") as f:
@@ -77,7 +90,7 @@ for rows_og in main_rows:
           if np.std(main_copy) == 0 or np.std(other_copy) == 0:
             similarities.append((0,j))
           else: 
-            similarities.append((np.corrcoef(main_copy, other_copy)[0][1],j))
+            similarities.append((calculate_distance(main_copy,other_copy, args.metric),j))
       mean.append(np.mean(other_copy))
     # Calcular la media de la fila con el valor a predecir
     else:
@@ -88,7 +101,6 @@ for rows_og in main_rows:
   result = 0
   div = 0
   # Hacemos la predicción considerando la diferencia con la media
-  print (similarities)
   for sim in highest:
     result += sim[0] * (reviews[sim[1]][rows_og[1]]-mean[sim[1]])
     div += sim[0]

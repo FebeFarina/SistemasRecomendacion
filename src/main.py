@@ -4,10 +4,11 @@ import sys
 import copy
 import argparse
 
-
+# funcion que elimina un elemento de una lista
 def del_element(list, index):
   return list[:index] + list[index+1:]
 
+# funcion que calcula la distancia entre dos filas
 def calculate_distance(row1, row2, metric):
   if metric == 'pearson':
     return np.corrcoef(row1, row2)[0][1]
@@ -51,14 +52,15 @@ matrix_result = copy.deepcopy(reviews)
 # Llamamos main_rows a las filas que tienen valores vacíos
 main_rows = []
 
+# Obtenemos las filas con valores vacíos
 for j,rows in enumerate(reviews):
   for i in range(len(rows)):
     if rows[i] is None:
       main_rows.append((rows,i,j))
 
-# Rows_og contiene la fila con valores vacíos y los índices de fila y columna
+# Rows_og contiene la fila con valores vacíos y los índices de fila y columna. El siguiente bucle recorre cada fila en la que hay valores vacíos
 for rows_og in main_rows:
-  # Flags es un array de booleanos que almacena si hay un valor vacío en la fila
+  # Flags es un array de booleanos que almacena un true si es un valor vacío y un false si no lo es
   flags = []
   # Similarities es un array de tuplas que almacena la fila con su similaridad
   similarities = []
@@ -91,8 +93,9 @@ for rows_og in main_rows:
             similarities.append((0,j))
           else: 
             similarities.append((calculate_distance(main_copy,other_copy, args.metric),j))
+      # Calcular la media de la fila con el valor a predecir
       mean.append(np.mean(other_copy))
-    # Calcular la media de la fila con el valor a predecir
+    # Caso de filas iguales
     else:
       other_copy = [x for x in other_copy if x is not None]
       mean.append(np.mean(other_copy))

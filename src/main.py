@@ -1,12 +1,14 @@
 import numpy as np
 import heapq
 import sys
+import copy
 
 
 def del_element(list, index):
   return list[:index] + list[index+1:]
     
 
+filename = "ejemplo1"
 filename = "utility-matrix-5-10-1"
 
 
@@ -16,7 +18,7 @@ with open("data/" + filename + ".txt", "r") as f:
 min_rate = float(contents[0].strip())
 max_rate = float(contents[1].strip())
 
-matrix_data = []
+reviews = []
 
 #Los datos se normalizan a valores entre 0 y 1
 for line in contents[2:]:
@@ -29,11 +31,9 @@ for line in contents[2:]:
       exit()
     else:
       row[row.index(x)] = (float(x) - min_rate)/(max_rate-min_rate)
-  matrix_data.append(row)
+  reviews.append(row)
 
-# Reviews es la matriz de datos
-reviews = matrix_data
-matrix_result = reviews.copy()
+matrix_result = copy.deepcopy(reviews)
 
 # Llamamos main_rows a las filas que tienen valores vacíos
 main_rows = []
@@ -74,17 +74,21 @@ for rows_og in main_rows:
           help_val -= 1
       # No añadiremos las similitudes de las filas que no tengas valores en la misma columna que el valor a predecir
       if reviews[j][rows_og[1]] is not None:
-        similarities.append((np.corrcoef(main_copy, other_copy)[0][1],j))
+          if np.std(main_copy) == 0 or np.std(other_copy) == 0:
+            similarities.append((0,j))
+          else: 
+            similarities.append((np.corrcoef(main_copy, other_copy)[0][1],j))
       mean.append(np.mean(other_copy))
     # Calcular la media de la fila con el valor a predecir
     else:
-      other_rows = [x for x in other_rows if x is not None]
-      mean.append(np.mean(other_rows))
+      other_copy = [x for x in other_copy if x is not None]
+      mean.append(np.mean(other_copy))
   # Obtenemos las dos similitudes más altas
   highest = heapq.nlargest(2, similarities)
   result = 0
   div = 0
   # Hacemos la predicción considerando la diferencia con la media
+  print (similarities)
   for sim in highest:
     result += sim[0] * (reviews[sim[1]][rows_og[1]]-mean[sim[1]])
     div += sim[0]
@@ -96,5 +100,9 @@ sys.stdout = open("results/" + filename + "-predicted.txt", "w")
 for row in matrix_result:
   for e in row:
     e = e * (max_rate-min_rate) + min_rate
+    if e > max_rate:
+        e = max_rate
+    elif e < min_rate:
+        e = min_rate
     sys.stdout.write(str(round(e,3)) + " ")
   sys.stdout.write("\n")

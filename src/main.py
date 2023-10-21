@@ -8,6 +8,14 @@ import argparse
 def del_element(list, index):
   return list[:index] + list[index+1:]
 
+def remove_none(list_original, list_main, list_other):
+    help_val = 0
+    for i,e in enumerate(list_original):
+        if e is None:
+            list_main.remove(e)
+            list_other = del_element(list_other, i)
+            help_val -= 1
+
 # funcion que calcula la distancia entre dos filas
 def calculate_distance(row1, row2, metric):
   if metric == 'pearson':
@@ -15,11 +23,26 @@ def calculate_distance(row1, row2, metric):
   elif metric == 'cosine':
     return 1 - np.dot(row1, row2)/(np.linalg.norm(row1)*np.linalg.norm(row2))
   elif metric == 'euclidean':
-    return np.linalg.norm(row1-row2)
+    return np.linalg.norm(np.array(row1) - np.array(row2))
+
+def predict(neighbors, predict_type):
+  result = 0
+  div = 0
+  for sim in highest:
+    if predict_type == 'meandif':
+      result += sim[0] * reviews[sim[1]][rows_og[1]]-mean[sim[1]]
+    elif predict_type == 'simple':
+      result += sim[0] * (reviews[sim[1]][rows_og[1]])
+    div += abs(sim[0])
+  result =(result/div)
+  if predict_type == 'meandif':
+    result += mean[rows_og[2]]
+  return result
     
 parser = argparse.ArgumentParser(description='Process filename.')
 parser.add_argument('-f', '--file', type=str, help='filename', required=True)
 parser.add_argument('-m', '--metric', type=str, help='metric', choices=['pearson', 'cosine', 'euclidean'], required=True)
+parser.add_argument('-p', '--predict', type=str, help='predict', choices=['simple', 'meandif'], required=True)
 
 args = parser.parse_args()
 
@@ -100,15 +123,8 @@ for rows_og in main_rows:
       other_copy = [x for x in other_copy if x is not None]
       mean.append(np.mean(other_copy))
   # Obtenemos las dos similitudes más altas
-  highest = heapq.nlargest(2, similarities)
-  result = 0
-  div = 0
-  # Hacemos la predicción considerando la diferencia con la media
-  for sim in highest:
-    result += sim[0] * (reviews[sim[1]][rows_og[1]]-mean[sim[1]])
-    div += abs(sim[0])
-  result =mean[rows_og[2]] + (result/div)
-  matrix_result[rows_og[2]][rows_og[1]] = result
+  highest = heapq.nlargest(2, similarities) 
+  matrix_result[rows_og[2]][rows_og[1]] = predict(highest, args.predict)
 
 # Desnormalizamos los valores y almacenamos en fichero
 sys.stdout = open("results/" + filename + "-predicted.txt", "w")

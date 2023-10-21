@@ -36,7 +36,7 @@ pip install <package>
 
 ### Funciones
 
-lo primero que vemos al analizar el codigo son distinta funciones que usamos varias veces a lo largo del codigo. En nuestro caso y para una mayor ordenacion las hemos separado en 2 ficheros:
+Lo primero que vemos al analizar el codigo son distinta funciones que usamos varias veces a lo largo del codigo. En nuestro caso y para una mayor ordenacion las hemos separado en 2 ficheros:
 
 ```python
 # Función que elimina un elemento de una lista
@@ -52,23 +52,56 @@ def remove_none(list_original, list_main, list_other):
             help_val -= 1
     return list_othe
 ```
-el primer fichero llamado del_function.py contiene las funciones que usamos para eliminar elementos de una lista y para eliminar los valores None de una lista y el valor de la misma columna de la otra lista.
+
+El primer fichero llamado del_function.py contiene las funciones que usamos para eliminar elementos de una lista y para eliminar los valores None de una lista y el valor de la misma columna de la otra lista.
+
+Debido a que estamos eliminando valores no solo en la columna de la fila que estamos comparando, sino tambien en la columna de la fila con la que estamos comparando, se pueden quedar valores sin analizar al desplazarse las filas, por eso tras cada eliminacion de un valor, retrocedemos en 1 el indice para que no se salte ningún valor.
 
 El segundo fichero llamado pred_functions.py contiene las funciones que usamos para calcular la distancia entre vectores:
 
 ```python
+import numpy as np
 
+# funcion que calcula la distancia entre dos filas
+def calculate_distance(row1, row2, metric):
+  if metric == 'pearson':
+    if np.std(row1) == 0 or np.std(row2) == 0:
+      return 0
+    return np.corrcoef(row1, row2)[0][1]
+  elif metric == 'cosine':
+    if np.linalg.norm(row1) == 0 or np.linalg.norm(row2) == 0:
+      return 0
+    return np.dot(row1, row2)/(np.linalg.norm(row1)*np.linalg.norm(row2))
+  elif metric == 'euclidean':
+    return np.linalg.norm(np.array(row1) - np.array(row2))
+
+def predict(neighbors, predict_type, reviews, rows_og, mean):
+  result = 0
+  div = 0
+  for sim in neighbors:
+    if predict_type == 'meandif':
+      result += sim[0] * reviews[sim[1]][rows_og[1]]-mean[sim[1]]
+    elif predict_type == 'simple':
+      result += sim[0] * (reviews[sim[1]][rows_og[1]])
+    div += abs(sim[0])
+  result =(result/div)
+  if predict_type == 'meandif':
+    result += mean[rows_og[2]]
+  return result
 ```
+
+Como podemos ver, la primera función que tenemos es la que calcula la distancia entre vectores. Esta función recibe como parametros los 2 vectores a comparar y el tipo de métrica que queremos usar (pearson, cosine o euclidean). Dependiendo del tipo de métrica que hayamos elegido, la función calculará la distancia entre vectores de una forma u otra. La segunda función que tenemos es la que calcula el valor a predecir. Esta función recibe como parametros los 2 vectores mas similares, el tipo de predicción que queremos hacer (simple o meandif), la matriz de datos, la fila donde se encuentra el valor a predecir y la lista de promedios de las filas. Dependiendo del tipo de predicción que hayamos elegido, la función calculará el valor a predecir de una forma u otra.
 
 ### Lectura de ficheros y parseo de argumentos
 
-Lo siguiente que vemos en el código es como recoje y procesa los datos que entran por linea de comandos. Estos comandos serian el nombre del fichero donde estan los datos a cargar, y el segundo el tipo de métrica que queremos usar para calcular la distancia entre vectores y el último como deseamos predecir los valores, si de forma simple o usando la media de la fila.
+Lo siguiente que vemos en el código es como recoje y procesa los datos que entran por linea de comandos. Estos comandos serian el nombre del fichero donde estan los datos a cargar, y el segundo el tipo de métrica que queremos usar para calcular la distancia entre vectores, como deseamos predecir los valores, si de forma simple o usando la media de la fila y el número de vecinos que deseamos para realizar la predicción.
 
 ```python
 parser = argparse.ArgumentParser(description='Process filename.')
 parser.add_argument('-f', '--file', type=str, help='filename', required=True)
 parser.add_argument('-m', '--metric', type=str, help='metric', choices=['pearson', 'cosine', 'euclidean'], required=True)
 parser.add_argument('-p', '--predict', type=str, help='predict', choices=['simple', 'meandif'], required=True)
+parser.add_argument('-n', '--neighbors', type=int, help='neighbors', default=2)
 
 args = parser.parse_args()
 
@@ -104,9 +137,9 @@ for line in contents[2:]:
 matrix_result = copy.deepcopy(reviews)ç
 ```
 
-como podemos apreciar tambien en el código anterior, lo primero que hacemos es leer los valores que seran el minimo valor y el maximo valor posible en la matriz. Tras esto, y miesntras leemos la matriz, normalizamos los datos a valores entre 0 y 1, para que no haya problemas a la hora de calcular las distancias entre vectores. En caso de encontrar un guion, lo sustituimos por un None, y en caso de que el valor no este dentro del rango, mostramos un error y salimos del programa.
+Como podemos apreciar tambien en el código anterior, lo primero que hacemos es leer los valores que seran el minimo valor y el maximo valor posible en la matriz. Tras esto, y mientras leemos la matriz, normalizamos los datos a valores entre 0 y 1 para que no haya problemas a la hora de calcular las distancias entre vectores. En caso de encontrar un guión, lo sustituimos por un None. En caso de que el valor no esté dentro del rango, mostramos un error y salimos del programa.
 
-Tras esto, buscamos con la siguiente funcion las filas en las que hemos encontrado un None, y las guardamos en una lista para usarlas mas adelante:
+Tras esto, buscamos con la siguiente función las filas en las que hemos encontrado un None, y las guardamos en una lista para usarlas más adelante:
 
 ```python
 # Llamamos main_rows a las filas que tienen valores vacíos
@@ -140,11 +173,11 @@ for rows_og in main_rows:
 ```
 
 Lo siguiente que hacemos es proceder a resolver y sustituir los valores None por valores calculados por el programa.
-Entraremos en un bucle que recorra las filas que tenienen valores vacios. Estos estan guardados aparte gracias al fragmento de codigo anterior.
-Lo siguiente que haremos sera crear unas variables que nos ayudaran a calcular los valores que necesitamos. Estas variables son:
+Entraremos en un bucle que recorra las filas que tienen valores vacíos. Estos están guardados aparte gracias al fragmento de código anterior.
+Lo siguiente que haremos sera crear unas variables que nos ayudarán a calcular los valores que necesitamos. Estas variables son:
 
 - flags: un array de booleanos que almacena un true si es un valor vacío y un false si no lo es
-- similarities: un array de tuplas que almacena el numero de la fila dentro de la matriz y su valor de similaridad con la fila en la que estamos calculando el valor
+- similarities: un array de tuplas que almacena el número de la fila dentro de la matriz y su valor de similaridad con la fila en la que estamos calculando el valor
 - mean: es un array que almacena el promedio de cada fila
 
 Ya entrando en el bucle lo que vamos a hacer es ir comparando entre la fila donde está el el valor a calcular con las otras para saber la similitud de las otras filas con la primera mencionada.
@@ -158,24 +191,15 @@ Para poder sacar la similitud entre filas, primero debemos eliminar los valores 
 ```python
 # Caso de filas distintas
     if j != rows_og[2]:
-      help_val = 0
       # Eliminamos los valores vacíos de la fila que estamos comparando
-      for i,e in enumerate(rows_og[0]):
-        if e is None:
-          main_copy.remove(e)
-          other_copy = del_element(other_copy, i+help_val)
-          help_val -= 1
-      help_val = 0
-      other_copy2 = other_copy.copy()
+      other_copy = remove_none(rows_og[0], main_copy, other_copy)
       # Eliminamos los valores vacíos de la otra fila
-      for i,e in enumerate(other_copy2):
-        if e is None:
-          other_copy.remove(e)
-          main_copy = del_element(main_copy, i+help_val)
-          help_val -= 1
+      other_copy2 = other_copy.copy()
+      main_copy = remove_none(other_copy2, other_copy, main_copy)
 ```
 
-Debido a que estamos eliminando valores no solo en la columna de la fila que estamos comparando, sino tambien en la columna de la fila con la que estamos comparando, se pueden quedar valores sin analizar al desplazarse las filas, por eso tras cada eliminacion de un valor, retrocedemos en 1 el indice para que no se salte ningún valor.
+Como podemos ver, para eliminar los valores llamamos a la misma función 2 veces cambiando el orden de las filas que comparamos, para asi borrar primero los nones de la fila main, y luego los de la fila other (con sus respectivas columnas)
+
 
 #### Calculamos la similitud entre filas
 
@@ -183,23 +207,29 @@ Ya una vez eliminados los valores None, procedemos a calcular la similitud entre
 
 ```python
  # No añadiremos las similitudes de las filas que no tengas valores en la misma columna que el valor a predecir
-      if reviews[j][rows_og[1]] is not None:
-          if np.std(main_copy) == 0 or np.std(other_copy) == 0:
-            similarities.append((0,j))
-          else:
-            similarities.append((calculate_distance(main_copy,other_copy, args.metric),j))
+if reviews[j][rows_og[1]] is not None:
+        similarities.append((calculate_distance(main_copy,other_copy, args.metric),j))
+      # Calcular la media de la fila con el valor a predecir
       mean.append(np.mean(other_copy))
 ```
 
 Lo primero que vemos en el fragmento de código anterior es que si la fila con la que estamos comparando no tiene valor en la misma columna que el valor a predecir, no añadiremos la similitud de esa fila a la lista de similitudes. Esto es debido a que no podremos calcular la similitud entre filas si no tienen valores en las mismas columnas.
-Como podemos ver también, si la desviacion tipica de alguna de las filas es 0, no podremos calcular la similitud entre filas, por lo que en ese caso, añadiremos un 0 a la lista de similitudes.
+Como podemos ver también, si la desviación típica de alguna de las filas es 0, no podremos calcular la similitud entre filas, por lo que en ese caso, añadiremos un 0 a la lista de similitudes.
 
 En un caso normal, entraremos por el else, donde calcularemos la similitud dependiendo del tipo de métrica que hayamos elegido al inicio del programa. Tras esto, añadiremos la similitud a la lista de similitudes y el promedio de la fila a la lista de promedios.
 
-Lo siguiente que hacemos es elegir de las similitudes los 2 valores mayores, ya que solo necesitamos 2 valores para calcular el valor a predecir:
+```python
+    else:
+      other_copy = [x for x in other_copy if x is not None]
+      mean.append(np.mean(other_copy))
+```
+
+Si estamos comparando una fila consigo misma, tendremos que tener en cuenta su media en el caso de hacer la predicción por diferencia con la media. Para ello, eliminamos todos los valores vacíos de la fila y añadimos su media a la lista de promedios.
+
+Se nos pasa como argumento el número de vecinos que necesitaremos para realizar la predicción, por lo que ordenamos la lista de similitudes y nos quedamos con los N primeros valores:
 
 ```python
-highest = heapq.nlargest(2, similarities)
+highest = heapq.nlargest(args.neighbors, similarities) 
 ```
 
 #### Calculamos el valor a predecir
@@ -207,17 +237,10 @@ highest = heapq.nlargest(2, similarities)
 Ya una vez tenemos los 2 valores mas similares, procedemos a calcular el valor a predecir:
 
 ```python
-result = 0
-  div = 0
-  # Hacemos la predicción considerando la diferencia con la media
-  for sim in highest:
-    result += sim[0] * (reviews[sim[1]][rows_og[1]]-mean[sim[1]])
-    div += abs(sim[0])
-  result =mean[rows_og[2]] + (result/div)
-  matrix_result[rows_og[2]][rows_og[1]] = result
+ matrix_result[rows_og[2]][rows_og[1]] = predict(highest, args.predict, reviews, rows_og, mean)
 ```
 
-Lo primero que hacemos es inicializar las variables que vamos a usar para calcular el valor a predecir. Tras esto, y usando los 2 valores mayores de la lista de similitudes, procedemos a calcular el valor a predecir. Para ello, lo que hacemos es multiplicar la similitud de cada fila con la fila que tiene el valor a predecir por la diferencia entre el valor a predecir y el promedio de la fila con la que estamos comparando. Tras esto, dividimos el resultado entre la suma de los valores absolutos de las similitudes de las filas con la fila que tiene el valor a predecir. Finalmente, sumamos el resultado a la media de la fila con la que estamos trabajando y guardamos el resultado en la matriz de resultados.
+Haciendo referencai a la función que enseñamos anteriormente, lo primero que hacemos es inicializar las variables que vamos a usar para calcular el valor a predecir. Tras esto, y usando los 2 valores mayores de la lista de similitudes, procedemos a calcular el valor a predecir. Para ello, lo que hacemos es multiplicar la similitud de cada fila con la fila que tiene el valor a predecir por la diferencia entre el valor a predecir y el promedio de la fila con la que estamos comparando. Tras esto, dividimos el resultado entre la suma de los valores absolutos de las similitudes de las filas con la fila que tiene el valor a predecir. Finalmente, sumamos el resultado a la media de la fila con la que estamos trabajando y guardamos el resultado en la matriz de resultados.
 
 Tras hacer todo lo mencionado anteriormente, obtenemos un valor que remplaza al none. Por lo que pasamos al siguiente none y repetimos el proceso hasta que no queden mas valores none en la matriz.
 

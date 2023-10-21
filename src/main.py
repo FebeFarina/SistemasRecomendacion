@@ -6,11 +6,11 @@ import argparse
 from del_function import remove_none, del_element
 from pred_function import calculate_distance, predict
 
-    
 parser = argparse.ArgumentParser(description='Process filename.')
 parser.add_argument('-f', '--file', type=str, help='filename', required=True)
 parser.add_argument('-m', '--metric', type=str, help='metric', choices=['pearson', 'cosine', 'euclidean'], required=True)
 parser.add_argument('-p', '--predict', type=str, help='predict', choices=['simple', 'meandif'], required=True)
+parser.add_argument('-n', '--neighbors', type=int, help='neighbors', default=2)
 
 args = parser.parse_args()
 
@@ -42,6 +42,7 @@ matrix_result = copy.deepcopy(reviews)
 
 # Llamamos main_rows a las filas que tienen valores vacíos
 main_rows = []
+all_similarities = dict(zip(list(range(len(reviews))), [[] for _ in range(len(reviews))]))
 
 # Obtenemos las filas con valores vacíos
 for j,rows in enumerate(reviews):
@@ -78,11 +79,15 @@ for rows_og in main_rows:
       other_copy = [x for x in other_copy if x is not None]
       mean.append(np.mean(other_copy))
   # Obtenemos las dos similitudes más altas
-  highest = heapq.nlargest(2, similarities) 
+  highest = heapq.nlargest(args.neighbors, similarities) 
   matrix_result[rows_og[2]][rows_og[1]] = predict(highest, args.predict, reviews, rows_og, mean)
+  if len(all_similarities[rows_og[2]]) < len(similarities):
+    all_similarities[rows_og[2]] = similarities
+  
 
 # Desnormalizamos los valores y almacenamos en fichero
 sys.stdout = open("results/" + filename + "-predicted.txt", "w")
+sys.stdout.write("Matriz de utilidad predicha:\n")
 for row in matrix_result:
   for e in row:
     e = e * (max_rate-min_rate) + min_rate
@@ -92,3 +97,13 @@ for row in matrix_result:
         e = min_rate
     sys.stdout.write(str(round(e,3)) + " ")
   sys.stdout.write("\n")
+sys.stdout.write("\n")
+sys.stdout.write("Similitudes:\n")
+for i in range(len(all_similarities)):
+  if len(all_similarities[i]) == 0:
+    sys.stdout.write("Fila " + str(i) + " sin similitudes (no fue necesario su cálculo)\n")
+  else:
+    sys.stdout.write("Fila " + str(i) + ":\n")
+  for j in range(len(all_similarities[i])):
+    sys.stdout.write("\tFila " + str(all_similarities[i][j][1]) + " con similitud " + str(round(all_similarities[i][j][0],3)) + "\n")
+sys.stdout.write("\n")

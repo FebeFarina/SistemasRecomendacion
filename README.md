@@ -36,37 +36,29 @@ pip install <package>
 
 ### Funciones
 
-lo primero que vemos al analizar el codigo son distinta funciones que usamos varias veces a lo largo del codigo, como son:
+lo primero que vemos al analizar el codigo son distinta funciones que usamos varias veces a lo largo del codigo. En nuestro caso y para una mayor ordenacion las hemos separado en 2 ficheros:
 
 ```python
+# Función que elimina un elemento de una lista
 def del_element(list, index):
   return list[:index] + list[index+1:]
-
-def calculate_distance(row1, row2, metric):
-  if metric == 'pearson':
-    return np.corrcoef(row1, row2)[0][1]
-  elif metric == 'cosine':
-    return 1 - np.dot(row1, row2)/(np.linalg.norm(row1)*np.linalg.norm(row2))
-  elif metric == 'euclidean':
-    return np.linalg.norm(row1-row2)
-
-def predict(neighbors, predict_type):
-  result = 0
-  div = 0
-  for sim in highest:
-    if predict_type == 'meandif':
-      result += sim[0] * reviews[sim[1]][rows_og[1]]-mean[sim[1]]
-    elif predict_type == 'simple':
-      result += sim[0] * (reviews[sim[1]][rows_og[1]])
-    div += abs(sim[0])
-  result =(result/div)
-  if predict_type == 'meandif':
-    result += mean[rows_og[2]]
-  return result
+# Función que elimina los valores vacíos de una lista y el valor de la misma columna de la otra lista
+def remove_none(list_original, list_main, list_other):
+    help_val = 0
+    for i,e in enumerate(list_original):
+        if e is None:
+            list_main.remove(e)
+            list_other = del_element(list_other, i+help_val)
+            help_val -= 1
+    return list_othe
 ```
+el primer fichero llamado del_function.py contiene las funciones que usamos para eliminar elementos de una lista y para eliminar los valores None de una lista y el valor de la misma columna de la otra lista.
 
-La primera función se encarga de eliminar elementos en concreto de una lista dado un índice.
-La segunda función la usamos a la hora de elegir la métrica de distancia, ya que dependiendo de la métrica que elijamos, la función que usaremos para calcular la distancia entre dos vectores será una u otra.
+El segundo fichero llamado pred_functions.py contiene las funciones que usamos para calcular la distancia entre vectores:
+
+```python
+
+```
 
 ### Lectura de ficheros y parseo de argumentos
 

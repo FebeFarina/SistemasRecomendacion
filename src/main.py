@@ -3,41 +3,9 @@ import heapq
 import sys
 import copy
 import argparse
+from del_function import remove_none, del_element
+from pred_function import calculate_distance, predict
 
-# funcion que elimina un elemento de una lista
-def del_element(list, index):
-  return list[:index] + list[index+1:]
-
-def remove_none(list_original, list_main, list_other):
-    help_val = 0
-    for i,e in enumerate(list_original):
-        if e is None:
-            list_main.remove(e)
-            list_other = del_element(list_other, i)
-            help_val -= 1
-
-# funcion que calcula la distancia entre dos filas
-def calculate_distance(row1, row2, metric):
-  if metric == 'pearson':
-    return np.corrcoef(row1, row2)[0][1]
-  elif metric == 'cosine':
-    return 1 - np.dot(row1, row2)/(np.linalg.norm(row1)*np.linalg.norm(row2))
-  elif metric == 'euclidean':
-    return np.linalg.norm(np.array(row1) - np.array(row2))
-
-def predict(neighbors, predict_type):
-  result = 0
-  div = 0
-  for sim in highest:
-    if predict_type == 'meandif':
-      result += sim[0] * reviews[sim[1]][rows_og[1]]-mean[sim[1]]
-    elif predict_type == 'simple':
-      result += sim[0] * (reviews[sim[1]][rows_og[1]])
-    div += abs(sim[0])
-  result =(result/div)
-  if predict_type == 'meandif':
-    result += mean[rows_og[2]]
-  return result
     
 parser = argparse.ArgumentParser(description='Process filename.')
 parser.add_argument('-f', '--file', type=str, help='filename', required=True)
@@ -95,27 +63,14 @@ for rows_og in main_rows:
     main_copy = rows_og[0].copy()
     # Caso de filas distintas
     if j != rows_og[2]:
-      help_val = 0
       # Eliminamos los valores vacíos de la fila que estamos comparando
-      for i,e in enumerate(rows_og[0]):
-        if e is None:
-          main_copy.remove(e)
-          other_copy = del_element(other_copy, i+help_val)
-          help_val -= 1
-      help_val = 0
-      other_copy2 = other_copy.copy()
+      other_copy = remove_none(rows_og[0], main_copy, other_copy)
       # Eliminamos los valores vacíos de la otra fila
-      for i,e in enumerate(other_copy2):
-        if e is None:
-          other_copy.remove(e)
-          main_copy = del_element(main_copy, i+help_val)
-          help_val -= 1
+      other_copy2 = other_copy.copy()
+      main_copy = remove_none(other_copy2, other_copy, main_copy)
       # No añadiremos las similitudes de las filas que no tengas valores en la misma columna que el valor a predecir
       if reviews[j][rows_og[1]] is not None:
-          if np.std(main_copy) == 0 or np.std(other_copy) == 0:
-            similarities.append((0,j))
-          else: 
-            similarities.append((calculate_distance(main_copy,other_copy, args.metric),j))
+        similarities.append((calculate_distance(main_copy,other_copy, args.metric),j))
       # Calcular la media de la fila con el valor a predecir
       mean.append(np.mean(other_copy))
     # Caso de filas iguales
@@ -124,7 +79,7 @@ for rows_og in main_rows:
       mean.append(np.mean(other_copy))
   # Obtenemos las dos similitudes más altas
   highest = heapq.nlargest(2, similarities) 
-  matrix_result[rows_og[2]][rows_og[1]] = predict(highest, args.predict)
+  matrix_result[rows_og[2]][rows_og[1]] = predict(highest, args.predict, reviews, rows_og, mean)
 
 # Desnormalizamos los valores y almacenamos en fichero
 sys.stdout = open("results/" + filename + "-predicted.txt", "w")

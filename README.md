@@ -240,20 +240,28 @@ Ya una vez tenemos los 2 valores mas similares, procedemos a calcular el valor a
  matrix_result[rows_og[2]][rows_og[1]] = predict(highest, args.predict, reviews, rows_og, mean)
 ```
 
-Haciendo referencai a la función que enseñamos anteriormente, lo primero que hacemos es inicializar las variables que vamos a usar para calcular el valor a predecir. Tras esto, y usando los 2 valores mayores de la lista de similitudes, procedemos a calcular el valor a predecir. Para ello, lo que hacemos es multiplicar la similitud de cada fila con la fila que tiene el valor a predecir por la diferencia entre el valor a predecir y el promedio de la fila con la que estamos comparando. Tras esto, dividimos el resultado entre la suma de los valores absolutos de las similitudes de las filas con la fila que tiene el valor a predecir. Finalmente, sumamos el resultado a la media de la fila con la que estamos trabajando y guardamos el resultado en la matriz de resultados.
+Haciendo referencia a la función que enseñamos anteriormente, lo primero que hacemos es inicializar las variables que vamos a usar para calcular el valor a predecir. Tras esto, y usando los 2 valores mayores de la lista de similitudes, procedemos a calcular el valor a predecir. Para ello, lo que hacemos es multiplicar la similitud de cada fila con la fila que tiene el valor a predecir por la diferencia entre el valor a predecir y el promedio de la fila con la que estamos comparando. Tras esto, dividimos el resultado entre la suma de los valores absolutos de las similitudes de las filas con la fila que tiene el valor a predecir. Finalmente, sumamos el resultado a la media de la fila con la que estamos trabajando y guardamos el resultado en la matriz de resultados.
 
 Tras hacer todo lo mencionado anteriormente, obtenemos un valor que remplaza al none. Por lo que pasamos al siguiente none y repetimos el proceso hasta que no queden mas valores none en la matriz.
 
 Es importante mencionar que en nuestro caso, a la hora de decidir y hacer el código, no usamos valores que estos mismos generan para obtener otros valores, esto lo hacemos a causa de que son predicciones y no valores reales, por lo que no queremos que un valor que hemos calculado influya en el calculo de otro valor.
 
+Por último, para poder mostrar al final uno de los resultados que se nos desea mostrar, guardamos en "all_similarities" las similitudes de la fila con todas las otras filas. Cabe destacar el condicional previo creado para comprobar que se coloque el caso en el que mas veces se genera similitudes en una fila con otra fila (un caso en el que puede generar menos es cuando en la misma columna que deseamos predecir el valor, tambien hay un none en la fila con la que estamos comparando, para optimizar el programa, no calculamos la similitud en ese caso)
+
+```python
+  if len(all_similarities[rows_og[2]]) < len(similarities):
+    all_similarities[rows_og[2]] = similarities
+```
+
 ### Retorno de resultados
 
-Una vez cambiados todos los valores none por valores calculados por el programa, procedemos primero a desnormalizar los valores de la matriz de resultados:
+Una vez cambiados todos los valores none por valores calculados por el programa, procedemos a preparar el fichero con los resultados y los datos que se nos piden:
 
 ```python
 
 # Desnormalizamos los valores y almacenamos en fichero
 sys.stdout = open("results/" + filename + "-predicted.txt", "w")
+sys.stdout.write("Matriz de utilidad predicha:\n")
 for row in matrix_result:
   for e in row:
     e = e * (max_rate-min_rate) + min_rate
@@ -263,11 +271,30 @@ for row in matrix_result:
         e = min_rate
     sys.stdout.write(str(round(e,3)) + " ")
   sys.stdout.write("\n")
+sys.stdout.write("\n")
+sys.stdout.write("Predicciones:\n")
+for i in range(len(all_neighbors)):
+  sys.stdout.write("[" + str(all_neighbors[i][1]+1) + "][" + str(all_neighbors[i][2]+1) + "]: " +
+   str(round(matrix_result[all_neighbors[i][1]][all_neighbors[i][2]] * (max_rate - min_rate) + min_rate,3)) + "\n")
+sys.stdout.write("\n")
+sys.stdout.write("Similitudes:\n")
+for i in range(len(all_similarities)):
+  if len(all_similarities[i]) == 0:
+    sys.stdout.write("Fila " + str(i+1) + " sin similitudes (no fue necesario su cálculo)\n")
+  else:
+    sys.stdout.write("Fila " + str(i+1) + ":\n")
+  for j in range(len(all_similarities[i])):
+    sys.stdout.write("\tFila " + str(all_similarities[i][j][1]+1) + " con similitud " + str(round(all_similarities[i][j][0],3)) + "\n")
+sys.stdout.write("\n")
+sys.stdout.write("Vecinos:\n")
+for i in range(len(all_neighbors)):
+  sys.stdout.write("[" + str(all_neighbors[i][1]+1) + "][" + str(all_neighbors[i][2]+1) + "]:\n") 
+  for j in range(len(all_neighbors[i][0])):
+    sys.stdout.write("\tFila " + str(all_neighbors[i][0][j][1]+1) + " con similitud " + str(round(all_neighbors[i][0][j][0],3)) + "\n")
 
 ```
 
-Tras esto, guardamos los resultados en un fichero de texto.
-Importante mencionar que si el valor calculado es mayor que el valor maximo de la matriz, lo igualamos al valor maximo, y si es menor que el valor minimo, lo igualamos al valor minimo. Esto es un caso poco comun, pero puede darse debido a que solo exista un valor de similitud positivo, dando como resultado valores o demasiado altos o demasiado bajos.
+Lo primero que hacemos aqui es desnormalizar los valores de la matriz de resultados y guardarlos en un fichero. Tras esto, guardamos en el fichero las predicciones que ha hecho el programa ordenandolas por posiciones en la matriz. Luego guardamos en el fichero las similitudes que ha calculado el programa de todas las filas con todas las filas. Finalmente, guardamos en el fichero los vecinos que ha usado el programa para calcular las predicciones.
 
 ## Ejemplos de uso
 

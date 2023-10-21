@@ -5,7 +5,9 @@ def calculate_distance(row1, row2, metric):
   if metric == 'pearson':
     if np.std(row1) == 0 or np.std(row2) == 0:
       return 0
-    return np.corrcoef(row1, row2)[0][1]
+    num = (np.array(row1) - np.mean(row1)).dot(np.array(row2) - np.mean(row2))
+    den = (np.linalg.norm(np.array(row1) - np.mean(row1))*np.linalg.norm(np.array(row2) - np.mean(row2)))
+    return num/den
   elif metric == 'cosine':
     if np.linalg.norm(row1) == 0 or np.linalg.norm(row2) == 0:
       return 0

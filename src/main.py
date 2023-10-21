@@ -16,7 +16,6 @@ args = parser.parse_args()
 
 filename = args.file
 
-
 with open("data/" + filename + ".txt", "r") as f:
   contents = f.readlines()
 
@@ -86,7 +85,6 @@ for rows_og in main_rows:
   if len(all_similarities[rows_og[2]]) < len(similarities):
     all_similarities[rows_og[2]] = similarities
   
-
 # Desnormalizamos los valores y almacenamos en fichero
 sys.stdout = open("results/" + filename + "-predicted.txt", "w")
 sys.stdout.write("Matriz de utilidad predicha:\n")
@@ -102,8 +100,12 @@ for row in matrix_result:
 sys.stdout.write("\n")
 sys.stdout.write("Predicciones:\n")
 for i in range(len(all_neighbors)):
-  sys.stdout.write("[" + str(all_neighbors[i][1]+1) + "][" + str(all_neighbors[i][2]+1) + "]: " +
-   str(round(matrix_result[all_neighbors[i][1]][all_neighbors[i][2]] * (max_rate - min_rate) + min_rate,3)) + "\n")
+  prediction = matrix_result[all_neighbors[i][1]][all_neighbors[i][2]] * (max_rate - min_rate) + min_rate
+  if prediction > max_rate:
+    prediction = max_rate
+  elif prediction < min_rate:
+    prediction = min_rate
+  sys.stdout.write("[" + str(all_neighbors[i][1]+1) + "][" + str(all_neighbors[i][2]+1) + "]: " + str(round(prediction ,3)) + "\n")
 sys.stdout.write("\n")
 sys.stdout.write("Similitudes:\n")
 for i in range(len(all_similarities)):

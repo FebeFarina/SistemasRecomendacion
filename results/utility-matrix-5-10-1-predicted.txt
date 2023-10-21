@@ -1,67 +1,67 @@
 Matriz de utilidad predicha:
-3.142 2.648 1.649 2.791 1.116 0.883 0.423 3.976 3.228 3.143 
-3.412 0.314 3.796 4.233 2.159 4.513 2.392 0.868 2.473 1.713 
-4.408 4.495 2.052 2.505 0.051 2.711 3.355 3.739 4.085 1.904 
-1.731 2.696 2.453 1.511 4.866 2.217 3.003 2.901 2.113 1.654 
+3.142 2.648 1.649 0.0 1.116 0.883 0.423 3.976 2.056 3.143 
+3.412 0.314 3.796 4.233 2.159 4.513 2.392 0.868 2.473 0.0 
+4.408 4.495 2.052 0.0 0.051 0.355 3.355 3.739 4.085 2.815 
+1.731 1.809 0.046 1.511 4.866 2.217 3.003 2.901 2.113 0.0 
 0.555 4.887 1.217 0.803 3.799 4.877 2.831 0.991 4.493 0.437 
 
 Predicciones:
-[1][4]: 2.791
-[1][9]: 3.228
-[2][10]: 1.713
-[3][4]: 2.505
-[3][6]: 2.711
-[3][10]: 1.904
-[4][2]: 2.696
-[4][3]: 2.453
-[4][10]: 1.654
+[1][4]: 0.0
+[1][9]: 2.056
+[2][10]: 0.0
+[3][4]: 0.0
+[3][6]: 0.355
+[3][10]: 2.815
+[4][2]: 1.809
+[4][3]: 0.046
+[4][10]: 0.0
 
 Similitudes:
 Fila 1:
-	Fila 2 con similitud 0.616
-	Fila 3 con similitud 0.902
-	Fila 4 con similitud 0.693
-	Fila 5 con similitud 0.539
+	Fila 2 con similitud -3.39
+	Fila 3 con similitud 3.389
+	Fila 4 con similitud -1.649
+	Fila 5 con similitud -4.644
 Fila 2:
-	Fila 1 con similitud 0.616
-	Fila 5 con similitud 0.69
+	Fila 1 con similitud -3.39
+	Fila 5 con similitud -2.201
 Fila 3:
-	Fila 1 con similitud 0.902
-	Fila 2 con similitud 0.749
-	Fila 4 con similitud 0.686
-	Fila 5 con similitud 0.761
+	Fila 1 con similitud 3.389
+	Fila 2 con similitud -1.81
+	Fila 4 con similitud -4.845
+	Fila 5 con similitud -0.342
 Fila 4:
-	Fila 1 con similitud 0.693
-	Fila 2 con similitud 0.78
-	Fila 3 con similitud 0.686
-	Fila 5 con similitud 0.848
+	Fila 1 con similitud -1.649
+	Fila 2 con similitud -3.873
+	Fila 3 con similitud -4.845
+	Fila 5 con similitud 2.388
 Fila 5 sin similitudes (no fue necesario su cálculo)
 
 Vecinos:
 [1][4]:
-	Fila 4 con similitud 0.693
-	Fila 2 con similitud 0.616
+	Fila 4 con similitud -1.649
+	Fila 2 con similitud -3.39
 [1][9]:
-	Fila 3 con similitud 0.902
-	Fila 4 con similitud 0.693
+	Fila 3 con similitud 3.389
+	Fila 4 con similitud -1.649
 [2][10]:
-	Fila 5 con similitud 0.69
-	Fila 1 con similitud 0.616
+	Fila 5 con similitud -2.201
+	Fila 1 con similitud -3.39
 [3][4]:
-	Fila 5 con similitud 0.761
-	Fila 2 con similitud 0.749
+	Fila 5 con similitud -0.342
+	Fila 2 con similitud -1.81
 [3][6]:
-	Fila 1 con similitud 0.902
-	Fila 5 con similitud 0.761
+	Fila 1 con similitud 3.389
+	Fila 5 con similitud -0.342
 [3][10]:
-	Fila 1 con similitud 0.902
-	Fila 5 con similitud 0.761
+	Fila 1 con similitud 3.389
+	Fila 5 con similitud -0.342
 [4][2]:
-	Fila 5 con similitud 0.848
-	Fila 2 con similitud 0.78
+	Fila 5 con similitud 2.388
+	Fila 1 con similitud -1.649
 [4][3]:
-	Fila 5 con similitud 0.848
-	Fila 2 con similitud 0.78
+	Fila 5 con similitud 2.388
+	Fila 1 con similitud -1.649
 [4][10]:
-	Fila 5 con similitud 0.848
-	Fila 1 con similitud 0.693
+	Fila 5 con similitud 2.388
+	Fila 1 con similitud -1.649

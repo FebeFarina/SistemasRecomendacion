@@ -39,10 +39,10 @@ for line in contents[2:]:
 
 matrix_result = copy.deepcopy(reviews)
 
-# Llamamos main_rows a las filas que tienen valores vacíos
-main_rows = []
 all_similarities = dict(zip(list(range(len(reviews))), [[] for _ in range(len(reviews))]))
 all_neighbors = []
+# Llamamos main_rows a las filas que tienen valores vacíos
+main_rows = []
 
 # Obtenemos las filas con valores vacíos
 for j,rows in enumerate(reviews):

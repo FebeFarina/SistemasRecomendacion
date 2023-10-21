@@ -139,9 +139,11 @@ matrix_result = copy.deepcopy(reviews)ç
 
 Como podemos apreciar tambien en el código anterior, lo primero que hacemos es leer los valores que seran el minimo valor y el maximo valor posible en la matriz. Tras esto, y mientras leemos la matriz, normalizamos los datos a valores entre 0 y 1 para que no haya problemas a la hora de calcular las distancias entre vectores. En caso de encontrar un guión, lo sustituimos por un None. En caso de que el valor no esté dentro del rango, mostramos un error y salimos del programa.
 
-Tras esto, buscamos con la siguiente función las filas en las que hemos encontrado un None, y las guardamos en una lista para usarlas más adelante:
+Tras esto, creamos un diccionario que nos servirá para guardar las similitudes de cada fila con las otras filas y una lista que nos servirá para guardar los vecinos que ha usado el programa para calcular las predicciones. Estas ultimas las usaremos principalmente para mostrar al final del programa los resultados que se nos piden. También, buscamos con la siguiente función las filas en las que hemos encontrado un None, y las guardamos en la lista "main_rows" lista para usarlas más adelante. Esta lista la llamaremos main_rows como se puede ver en el siguiente código.
 
 ```python
+all_similarities = dict(zip(list(range(len(reviews))), [[] for _ in range(len(reviews))]))
+all_neighbors = []
 # Llamamos main_rows a las filas que tienen valores vacíos
 main_rows = []
 
@@ -150,13 +152,14 @@ for j,rows in enumerate(reviews):
   for i in range(len(rows)):
     if rows[i] is None:
       main_rows.append((rows,i,j))
+
 ```
+
+
 
 ### Bucle principal
 
 ```python
-# Llamamos main_rows a las filas que tienen valores vacíos
-main_rows = []
 
 # Obtenemos las filas con valores vacíos
 for rows_og in main_rows:
@@ -226,10 +229,11 @@ En un caso normal, entraremos por el else, donde calcularemos la similitud depen
 
 Si estamos comparando una fila consigo misma, tendremos que tener en cuenta su media en el caso de hacer la predicción por diferencia con la media. Para ello, eliminamos todos los valores vacíos de la fila y añadimos su media a la lista de promedios.
 
-Se nos pasa como argumento el número de vecinos que necesitaremos para realizar la predicción, por lo que ordenamos la lista de similitudes y nos quedamos con los N primeros valores:
+Se nos pasa como argumento el número de vecinos que necesitaremos para realizar la predicción, por lo que ordenamos la lista de similitudes y nos quedamos con los N primeros valores. También añadimos a la lista de vecinos la lista de similitudes ordenada y los valores de la fila y columna donde se encuentra el valor a predecir.
 
 ```python
-highest = heapq.nlargest(args.neighbors, similarities) 
+highest = heapq.nlargest(args.neighbors, similarities)
+all_neighbors.append((highest, rows_og[2], rows_og[1])) 
 ```
 
 #### Calculamos el valor a predecir

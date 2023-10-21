@@ -13,14 +13,14 @@ def calculate_distance(row1, row2, metric):
       return 0
     return np.dot(row1, row2)/(np.linalg.norm(row1)*np.linalg.norm(row2))
   elif metric == 'euclidean':
-    return np.linalg.norm(np.array(row1) - np.array(row2))
+    return 1 / (1 + (np.linalg.norm(np.array(row1) - np.array(row2))))
 
 def predict(neighbors, predict_type, reviews, rows_og, mean):
   result = 0
   div = 0
   for sim in neighbors:
     if predict_type == 'meandif':
-      result += sim[0] * reviews[sim[1]][rows_og[1]]-mean[sim[1]]
+      result += sim[0] * (reviews[sim[1]][rows_og[1]]-mean[sim[1]])
     elif predict_type == 'simple':
       result += sim[0] * (reviews[sim[1]][rows_og[1]])
     div += abs(sim[0])

@@ -121,3 +121,4 @@ for i in range(len(all_neighbors)):
   sys.stdout.write("[" + str(all_neighbors[i][1]+1) + "][" + str(all_neighbors[i][2]+1) + "]:\n") 
   for j in range(len(all_neighbors[i][0])):
     sys.stdout.write("\tFila " + str(all_neighbors[i][0][j][1]+1) + " con similitud " + str(round(all_neighbors[i][0][j][0],3)) + "\n")
+sys.stdout = sys.__stdout__

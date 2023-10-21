@@ -43,6 +43,7 @@ matrix_result = copy.deepcopy(reviews)
 # Llamamos main_rows a las filas que tienen valores vacíos
 main_rows = []
 all_similarities = dict(zip(list(range(len(reviews))), [[] for _ in range(len(reviews))]))
+all_neighbors = []
 
 # Obtenemos las filas con valores vacíos
 for j,rows in enumerate(reviews):
@@ -80,6 +81,7 @@ for rows_og in main_rows:
       mean.append(np.mean(other_copy))
   # Obtenemos las dos similitudes más altas
   highest = heapq.nlargest(args.neighbors, similarities) 
+  all_neighbors.append((highest, rows_og[2], rows_og[1]))
   matrix_result[rows_og[2]][rows_og[1]] = predict(highest, args.predict, reviews, rows_og, mean)
   if len(all_similarities[rows_og[2]]) < len(similarities):
     all_similarities[rows_og[2]] = similarities
@@ -98,12 +100,22 @@ for row in matrix_result:
     sys.stdout.write(str(round(e,3)) + " ")
   sys.stdout.write("\n")
 sys.stdout.write("\n")
+sys.stdout.write("Predicciones:\n")
+for i in range(len(all_neighbors)):
+  sys.stdout.write("[" + str(all_neighbors[i][1]+1) + "][" + str(all_neighbors[i][2]+1) + "]: " +
+   str(round(matrix_result[all_neighbors[i][1]][all_neighbors[i][2]] * (max_rate - min_rate) + min_rate,3)) + "\n")
+sys.stdout.write("\n")
 sys.stdout.write("Similitudes:\n")
 for i in range(len(all_similarities)):
   if len(all_similarities[i]) == 0:
-    sys.stdout.write("Fila " + str(i) + " sin similitudes (no fue necesario su cálculo)\n")
+    sys.stdout.write("Fila " + str(i+1) + " sin similitudes (no fue necesario su cálculo)\n")
   else:
-    sys.stdout.write("Fila " + str(i) + ":\n")
+    sys.stdout.write("Fila " + str(i+1) + ":\n")
   for j in range(len(all_similarities[i])):
-    sys.stdout.write("\tFila " + str(all_similarities[i][j][1]) + " con similitud " + str(round(all_similarities[i][j][0],3)) + "\n")
+    sys.stdout.write("\tFila " + str(all_similarities[i][j][1]+1) + " con similitud " + str(round(all_similarities[i][j][0],3)) + "\n")
 sys.stdout.write("\n")
+sys.stdout.write("Vecinos:\n")
+for i in range(len(all_neighbors)):
+  sys.stdout.write("[" + str(all_neighbors[i][1]+1) + "][" + str(all_neighbors[i][2]+1) + "]:\n") 
+  for j in range(len(all_neighbors[i][0])):
+    sys.stdout.write("\tFila " + str(all_neighbors[i][0][j][1]+1) + " con similitud " + str(round(all_neighbors[i][0][j][0],3)) + "\n")

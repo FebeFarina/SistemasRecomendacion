@@ -307,15 +307,15 @@ Lo primero que hacemos aqui es desnormalizar los valores de la matriz de resulta
 a la hora de ejeuctar el codigo es tan sencillo como poner en la terminal:
 
 ```
-python3 /SistemasRecomendacion/src/main.py -f <fichero> -m <métrica> -p <predicción>
+python3 /SistemasRecomendacion/src/main.py -f <fichero> -m <métrica> -p <predicción> -n <vecinos>
 ```
 
-especificando con -f el nombre del fichero que queremos cargar y con -m la metrica que queremos usar para calcular la distancia entre vectores.
+especificando con -f el nombre del fichero que queremos cargar, -m la metrica que queremos usar para calcular la distancia entre vectores, -p el tipo de predicción que queremos usar y -n para especificar el número de vecinos que se usarán en la predicción. Todos los argumentos son obligatorios menos el último mencionado, que de no ser especificado usará 2 por defecto.
 
 Un ejemplo de ejecucion seria:
 
 ```
-python3 /SistemasRecomendacion/src/main.py -f utility-matrix-5-10-1 -m pearson -p simple
+python3 /SistemasRecomendacion/src/main.py -f utility-matrix-5-10-1 -m pearson -p simple -n 3
 ```
 
 dando como resultado un fichero con los valores predecidos por el programa. Este fichero se encontraria en el directorio results con el nombre del fichero de datos y el sufijo -predicted.
